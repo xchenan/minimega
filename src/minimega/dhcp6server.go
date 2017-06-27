@@ -40,13 +40,13 @@ func cliDhcp6Server(c *minicli.Command, resp *minicli.Response) error {
 	// ipFlag := flag.String("ip", "", "IPv6 address to serve over DHCPv6")
 	// flag.Parse()
 
-	fmt.Printf("command: %v\n", c)
+	fmt.Printf("command: %v\n", c.StringArgs)
+	// Only accept a single IPv6 address
+	ip := net.ParseIP(c.StringArgs["ipv6"]).To16()
+	if ip == nil || ip.To4() != nil {
+		return fmt.Errorf("IP is not an IPv6 address")
+	}
 	return nil
-	//	// Only accept a single IPv6 address
-	//	ip := net.ParseIP(*ipFlag).To16()
-	//	if ip == nil || ip.To4() != nil {
-	//		log.Fatal("IP is not an IPv6 address")
-	//	}
 	//
 	//	// Make Handler to assign ip and use handle for requests
 	//	h := &Handler{
