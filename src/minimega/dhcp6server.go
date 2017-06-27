@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/mdlayher/dhcp6"
+	"golang.org/x/net/ipv6"
 )
 
 var dhcp6CLIHandlers = []minicli.Handler{
@@ -36,31 +37,53 @@ To specify an server interface, do the following:
 }
 
 func cliDhcp6Server(c *minicli.Command, resp *minicli.Response) error {
-	// iface := flag.String("i", "eth0", "interface to serve DHCPv6")
-	// ipFlag := flag.String("ip", "", "IPv6 address to serve over DHCPv6")
-	// flag.Parse()
+	log.Printf("command: %v\n", c.StringArgs)
 
-	fmt.Printf("command: %v\n", c.StringArgs)
 	// Only accept a single IPv6 address
 	ip := net.ParseIP(c.StringArgs["ipv6"]).To16()
 	if ip == nil || ip.To4() != nil {
 		return fmt.Errorf("IP is not an IPv6 address")
 	}
+
+	// Set a default interface if not specified
+	iface, ok := c.StringArgs["interface"]
+	if !ok {
+		iface = "eth0"
+	}
+
+	// Make Handler to assign ip and use handle for requests
+	h := &Handler{
+		ip:      ip,
+		handler: handle,
+	}
+
+	// Listen and serve.
+	ifi, err := net.InterfaceByName(iface)
+	if err != nil {
+		return err
+	}
+
+	s := &dhcp6.Server{
+		Iface:   ifi,
+		Addr:    "[::]:547",
+		Handler: h,
+		MulticastGroups: []*net.IPAddr{
+			dhcp6.AllRelayAgentsAndServersAddr,
+			dhcp6.AllServersAddr,
+		},
+	}
+	conn, err := net.ListenPacket("udp6", s.Addr)
+	if err != nil {
+		return err
+	}
+
+	go func(conn net.PacketConn) {
+		defer conn.Close()
+		err = s.Serve(ipv6.NewPacketConn(conn))
+		log.Printf("dhcp server error: %v\n", err)
+	}(conn)
+
 	return nil
-	//
-	//	// Make Handler to assign ip and use handle for requests
-	//	h := &Handler{
-	//		ip:      ip,
-	//		handler: handle,
-	//	}
-	//
-	//	// Bind DHCPv6 server to interface and use specified handler
-	//	go func() {
-	//		log.Printf("binding DHCPv6 server to interface %s...", *iface)
-	//		if err := dhcp6.ListenAndServe(*iface, h); err != nil {
-	//			log.Fatal(err)
-	//		}
-	//	}()
 }
 
 // A Handler is a basic DHCPv6 handler.
