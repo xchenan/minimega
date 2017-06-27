@@ -5,38 +5,62 @@ package main
 
 import (
 	"encoding/hex"
-	"flag"
+	"fmt"
 	"log"
+	"minicli"
 	"net"
 	"time"
 
 	"github.com/mdlayher/dhcp6"
 )
 
-func dhcp6ServerStart() {
-	iface := flag.String("i", "eth0", "interface to serve DHCPv6")
-	ipFlag := flag.String("ip", "", "IPv6 address to serve over DHCPv6")
-	flag.Parse()
+var dhcp6CLIHandlers = []minicli.Handler{
+	{ // dhcp6Server
+		HelpShort: "start a dhcpv6 server on a specified ip",
+		HelpLong: `
+Start a dhcp/dns server on a specified IP. For example,
+to start a DHCP server which servers IP address dead:beef:d34d:b33f::10, do:
 
-	// Only accept a single IPv6 address
-	ip := net.ParseIP(*ipFlag).To16()
-	if ip == nil || ip.To4() != nil {
-		log.Fatal("IP is not an IPv6 address")
-	}
+	dhcp6 ip dead:beef:d34d:b33f::10
 
-	// Make Handler to assign ip and use handle for requests
-	h := &Handler{
-		ip:      ip,
-		handler: handle,
-	}
+To specify an server interface, do the following:
 
-	// Bind DHCPv6 server to interface and use specified handler
-	go func() {
-		log.Printf("binding DHCPv6 server to interface %s...", *iface)
-		if err := dhcp6.ListenAndServe(*iface, h); err != nil {
-			log.Fatal(err)
-		}
-	}()
+	dhcp6 i eth0 ip dead:beef:d34d:b33f::10`,
+
+		Patterns: []string{
+			"dhcp6 ip <ipv6 address>",
+			"dhcp6 i <interface> ip <ipv6 address>",
+		},
+		Call: wrapSimpleCLI(cliDhcp6Server),
+	},
+}
+
+func cliDhcp6Server(c *minicli.Command, resp *minicli.Response) error {
+	// iface := flag.String("i", "eth0", "interface to serve DHCPv6")
+	// ipFlag := flag.String("ip", "", "IPv6 address to serve over DHCPv6")
+	// flag.Parse()
+
+	fmt.Printf("command: %v\n", c)
+	return nil
+	//	// Only accept a single IPv6 address
+	//	ip := net.ParseIP(*ipFlag).To16()
+	//	if ip == nil || ip.To4() != nil {
+	//		log.Fatal("IP is not an IPv6 address")
+	//	}
+	//
+	//	// Make Handler to assign ip and use handle for requests
+	//	h := &Handler{
+	//		ip:      ip,
+	//		handler: handle,
+	//	}
+	//
+	//	// Bind DHCPv6 server to interface and use specified handler
+	//	go func() {
+	//		log.Printf("binding DHCPv6 server to interface %s...", *iface)
+	//		if err := dhcp6.ListenAndServe(*iface, h); err != nil {
+	//			log.Fatal(err)
+	//		}
+	//	}()
 }
 
 // A Handler is a basic DHCPv6 handler.
