@@ -1,0 +1,41 @@
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"checksumSHA1": "9Pcc1IiRqPxEcxU2KMpkrcEGb3k=",
+			"origin": "github.com/sandia-minimega/minimega/vendor/golang.org/x/net/bpf",
+			"path": "golang.org/x/net/bpf",
+			"revision": "f2810178d44e42334a34665236080196761acaaf",
+			"revisionTime": "2017-06-27T15:57:28Z"
+		},
+		{
+			"checksumSHA1": "KUnn8eAHMrtOhQ5eEsObpOO6jHg=",
+			"origin": "github.com/sandia-minimega/minimega/vendor/golang.org/x/net/internal/iana",
+			"path": "golang.org/x/net/internal/iana",
+			"revision": "f2810178d44e42334a34665236080196761acaaf",
+			"revisionTime": "2017-06-27T15:57:28Z"
+		},
+		{
+			"checksumSHA1": "5IbL5aAZfu+FMhrkv1soqQejTr4=",
+			"origin": "github.com/sandia-minimega/minimega/vendor/golang.org/x/net/internal/netreflect",
+			"path": "golang.org/x/net/internal/netreflect",
+			"revision": "f2810178d44e42334a34665236080196761acaaf",
+			"revisionTime": "2017-06-27T15:57:28Z"
+		},
+		{
+			"checksumSHA1": "9wLf6HzOwfIrJL4xlCQmhCw6FJc=",
+			"origin": "github.com/sandia-minimega/minimega/vendor/golang.org/x/net/ipv6",
+			"path": "golang.org/x/net/ipv6",
+			"revision": "f2810178d44e42334a34665236080196761acaaf",
+			"revisionTime": "2017-06-27T15:57:28Z"
+		},
+		{
+			"checksumSHA1": "zrfqk6BDi9dSkVd1NUlrRyUXnwE=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "9ccfe848b9db8435a24c424abbc07a921adf1df5",
+			"revisionTime": "2017-04-27T03:54:25Z"
+		}
+	],
+	"rootPath": "github.com/sandia-minimega/minimega/src"
+}
