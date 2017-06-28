@@ -4,6 +4,7 @@ package main
 import (
 	"github.com/krolaw/dhcp4"
 
+	"fmt"
 	"log"
 	"math/rand"
 	"minicli"
@@ -34,23 +35,36 @@ To specify an server interface, eth0, do the following:
 
 // Example using DHCP with a single network interface device
 func cliDhcp4Server(c *minicli.Command, resp *minicli.Response) error {
-	log.Printf("string args: %v\n", c.StringArgs)
+	serverIP := net.ParseIP(c.StringArgs["ipv4"]).To4()
+	if serverIP == nil {
+		log.Printf("ip: %v\n%v\n", c.StringArgs["ipv4"], serverIP)
+		return fmt.Errorf("IP is not an IPv4 address")
+	}
+
+	iface, ok := c.StringArgs["interface"]
+	if !ok {
+		iface = "eth0"
+	}
+
+	handler := &DHCPHandler{
+		ip:            serverIP,
+		leaseDuration: 2 * time.Hour,
+		start:         net.IP{192, 168, 0, 2},
+		leaseRange:    50,
+		leases:        make(map[int]lease, 10),
+		options: dhcp4.Options{
+			dhcp4.OptionSubnetMask:       []byte{255, 255, 240, 0},
+			dhcp4.OptionRouter:           []byte(serverIP), // Presuming Server is also your router
+			dhcp4.OptionDomainNameServer: []byte(serverIP), // Presuming Server is also your DNS server
+		},
+	}
+	// log.Fatal(dhcp4.ListenAndServe(handler))
+	go func(h *DHCPHandler) {
+		err := dhcp4.ListenAndServeIf(iface, h)
+		log.Printf("DHCPv4 Server error: %v\n", err)
+	}(handler) // Select interface on multi interface device
+
 	return nil
-	//	serverIP := net.IP{172, 30, 0, 1}
-	//	handler := &DHCPHandler{
-	//		ip:            serverIP,
-	//		leaseDuration: 2 * time.Hour,
-	//		start:         net.IP{172, 30, 0, 2},
-	//		leaseRange:    50,
-	//		leases:        make(map[int]lease, 10),
-	//		options: dhcp4.Options{
-	//			dhcp4.OptionSubnetMask:       []byte{255, 255, 240, 0},
-	//			dhcp4.OptionRouter:           []byte(serverIP), // Presuming Server is also your router
-	//			dhcp4.OptionDomainNameServer: []byte(serverIP), // Presuming Server is also your DNS server
-	//		},
-	//	}
-	//	log.Fatal(dhcp4.ListenAndServe(handler))
-	// log.Fatal(dhcp4.ListenAndServeIf("eth0",handler)) // Select interface on multi interface device
 }
 
 type lease struct {
